@@ -1,47 +1,63 @@
-iname: Build and Scan Docker Images
+name: Sysdig Secure Image Scan
 
-on: [push]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
-  build-scan:
+  scan:
+    name: Build and Scan Images
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Log in to Amazon ECR
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-          docker login --username AWS --password-stdin 503561444738.dkr.ecr.us-east-1.amazonaws.com
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Docker Images
-        run: |
-          docker build -t vote ./vote
-          docker tag vote:latest 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:vote
-          docker push 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:vote
+      - name: Build Vote image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./vote
+          push: false
+          tags: voting-app/vote:latest
+          load: true
 
-          docker build -t worker ./worker
-          docker tag worker:latest 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:worker
-          docker push 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:worker
+      - name: Build Result image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./result
+          push: false
+          tags: voting-app/result:latest
+          load: true
 
-          docker build -t result ./result
-          docker tag result:latest 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:result
-          docker push 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:result
+      - name: Build Worker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./worker
+          push: false
+          tags: voting-app/worker:latest
+          load: true
 
-      - name: Install Sysdig CLI Scanner
-        run: |
-          curl -L -o ./sysdig-cli-scanner https://download.sysdig.com/scanner/latest/sysdig-cli-scanner
-          chmod +x ./sysdig-cli-scanner
-
-      - name: Scan Docker Images with Sysdig
-        env:
-          SECURE_API_TOKEN: ${{ secrets.SYSDIG_API_TOKEN }}
-        run: |
-          ./sysdig-cli-scanner -a $SECURE_API_TOKEN 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:vote
-          ./sysdig-cli-scanner -a $SECURE_API_TOKEN 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:worker
-          ./sysdig-cli-scanner -a $SECURE_API_TOKEN 503561444738.dkr.ecr.us-east-1.amazonaws.com/sysdig/votingapp:result
-
+      - name: Scan Vote image
+        uses: sysdiglabs/scan-action@v3
+        with:
+          image-tag: "voting-app/vote:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: "https://app.au1.sysdig.com"
+          
+      - name: Scan Result image
+        uses: sysdiglabs/scan-action@v3
+        with:
+          image-tag: "voting-app/result:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: "https://app.au1.sysdig.com"
+          
+      - name: Scan Worker image
+        uses: sysdiglabs/scan-action@v3
+        with:
+          image-tag: "voting-app/worker:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: "https://app.au1.sysdig.com"
