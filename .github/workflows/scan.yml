@@ -1,0 +1,61 @@
+name: Sysdig Secure Image Scan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  scan:
+    name: Scan Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build Vote image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./vote
+          push: false
+          tags: voting-app/vote:latest
+          load: true
+
+      - name: Build Result image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./result
+          push: false
+          tags: voting-app/result:latest
+          load: true
+
+      - name: Build Worker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./worker
+          push: false
+          tags: voting-app/worker:latest
+          load: true
+
+      - name: Scan Vote image
+        uses: sysdiglabs/scan-action@v3
+        with:
+          image-tag: "voting-app/vote:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          
+      - name: Scan Result image
+        uses: sysdiglabs/scan-action@v3
+        with:
+          image-tag: "voting-app/result:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          
+      - name: Scan Worker image
+        uses: sysdiglabs/scan-action@v3
+        with:
+          image-tag: "voting-app/worker:latest"
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
