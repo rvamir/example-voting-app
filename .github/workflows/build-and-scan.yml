@@ -46,8 +46,8 @@ jobs:
         with:
           image-tag: "voting-app/vote:latest"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: "https://au1.app.sysdig.com"
-          sysdig-scanning-url: "https://au1.app.sysdig.com/api/scanning/v1"
+          sysdig-secure-url: "https://app.au1.sysdig.com"
+          sysdig-scanning-url: "https://secure.au1.sysdig.com/api/scanning/v1"
           debug: true
           
       - name: Scan Result image
@@ -55,8 +55,8 @@ jobs:
         with:
           image-tag: "voting-app/result:latest"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: "https://au1.app.sysdig.com"
-          sysdig-scanning-url: "https://au1.app.sysdig.com/api/scanning/v1"
+          sysdig-secure-url: "https://app.au1.sysdig.com"
+          sysdig-scanning-url: "https://secure.au1.sysdig.com/api/scanning/v1"
           debug: true
           
       - name: Scan Worker image
@@ -64,6 +64,6 @@ jobs:
         with:
           image-tag: "voting-app/worker:latest"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: "https://au1.app.sysdig.com"
-          sysdig-scanning-url: "https://au1.app.sysdig.com/api/scanning/v1"
+          sysdig-secure-url: "https://app.au1.sysdig.com"
+          sysdig-scanning-url: "https://secure.au1.sysdig.com/api/scanning/v1"
           debug: true
