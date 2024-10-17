@@ -46,18 +46,24 @@ jobs:
         with:
           image-tag: "voting-app/vote:latest"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: "https://app.au1.sysdig.com"
+          sysdig-secure-url: "https://au1.app.sysdig.com"
+          sysdig-scanning-url: "https://au1.app.sysdig.com/api/scanning/v1"
+          debug: true
           
       - name: Scan Result image
         uses: sysdiglabs/scan-action@v3
         with:
           image-tag: "voting-app/result:latest"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: "https://app.au1.sysdig.com"
+          sysdig-secure-url: "https://au1.app.sysdig.com"
+          sysdig-scanning-url: "https://au1.app.sysdig.com/api/scanning/v1"
+          debug: true
           
       - name: Scan Worker image
         uses: sysdiglabs/scan-action@v3
         with:
           image-tag: "voting-app/worker:latest"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: "https://app.au1.sysdig.com"
+          sysdig-secure-url: "https://au1.app.sysdig.com"
+          sysdig-scanning-url: "https://au1.app.sysdig.com/api/scanning/v1"
+          debug: true
