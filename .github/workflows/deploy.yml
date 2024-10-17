@@ -1,0 +1,27 @@
+name: Deploy Voting App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up kubectl
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name sysdig-assignment-cluster
+
+    - name: Deploy Voting App to Kubernetes
+      run: |
+        kubectl apply -f k8s-specifications/ --namespace=votingapp
+
+    - name: Verify Deployment
+      run: |
+        kubectl get pods -n votingapp
+
